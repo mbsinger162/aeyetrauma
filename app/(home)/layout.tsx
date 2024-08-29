@@ -20,7 +20,7 @@ const HomeLayout = ({ children }: { children: React.ReactNode }) => {
         </main>
       </div>
       <footer className="m-auto p-4">
-        Powered by GPT-4o and LangChainAI | Built by <DynamicLink />
+        Powered by GPT-4o and LangChainAI | Built by <DynamicLinks />
       </footer>
     </div>
   );
