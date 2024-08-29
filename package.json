@@ -15,6 +15,8 @@
     "@radix-ui/react-accordion": "^1.1.2",
     "ai": "^3.1.18",
     "clsx": "^2.1.1",
+    "csv-parser": "^3.0.0",
+    "d3-dsv": "^2.0.0",
     "dotenv": "^16.4.5",
     "langchain": "^0.2.3",
     "lucide-react": "^0.379.0",

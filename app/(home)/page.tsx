@@ -14,8 +14,20 @@ import {
 } from "@/components/ui/accordion";
 import { Document } from "@langchain/core/documents";
 
+interface CustomDocument extends Document {
+  source_type: "textbook" | "abstract";
+  pmid?: string | number;
+  title?: string;
+  authors?: string;
+  journal?: string;
+  publication_date?: string;
+  publication_year?: string;
+  citation_count?: number;
+  page_number?: number; // Add this line for page number
+}
+
 function extractFileName(path: string) {
-  const fileNameWithExtension = path.split(/[/\\]/).pop() || "";
+  const fileNameWithExtension = path?.split(/[/\\]/).pop() || "";
   const fileNameWithoutExtension = fileNameWithExtension
     .split(".")
     .slice(0, -1)
@@ -25,21 +37,12 @@ function extractFileName(path: string) {
 }
 
 export default function Home() {
-  const [sourcesForMessages, setSourcesForMessages] = useState<
-    Record<string, any>
-  >({});
+  const [sourcesForMessages, setSourcesForMessages] = useState<Record<string, CustomDocument[]>>({});
 
   const messageListRef = useRef<HTMLDivElement>(null);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
-  const {
-    messages,
-    input,
-    handleInputChange,
-    handleSubmit,
-    isLoading,
-    error,
-    setInput,
-  } = useChat({
+
+  const { messages, input, handleInputChange, handleSubmit, isLoading, error, setInput } = useChat({
     streamMode: "text",
     onResponse(response) {
       const sourcesHeader = response.headers.get("x-sources");
@@ -47,12 +50,32 @@ export default function Home() {
 
       const messageIndexHeader = response.headers.get("x-message-index");
       if (sources.length && messageIndexHeader !== null) {
-        setSourcesForMessages({
-          ...sourcesForMessages,
-          [messageIndexHeader]: sources,
-        });
+        const sourcesWithMetadata = sources.map((source: any) => {
+          const metadata = source.metadata || {};
+          return {
+            pageContent: source.pageContent,
+            source_type: metadata.source_type,
+            ...(metadata.source_type === "textbook" ? {
+              title: metadata.title || "No title available",
+              authors: metadata.authors || "No authors available",
+              publication_date: metadata.publication_date || "No date available",
+              publication_year: metadata.publication_year || "No year available",
+              page_number: metadata["loc.pageNumber"] || "No page number available", // Updated this line
+            } : {
+              pmid: metadata.pmid || "No PMID available",
+              title: metadata.title || "No title available",
+              authors: metadata.authors || "No authors available",
+              journal: metadata.journal || "No journal available",
+              publication_date: metadata.publication_date || "No date available",
+              citation_count: metadata.citation_count !== undefined ? metadata.citation_count : "No citation count available",
+            }),
+          };
+        }) as CustomDocument[];
 
-        console.log(sourcesForMessages);
+        setSourcesForMessages(prevSources => ({
+          ...prevSources,
+          [messageIndexHeader]: sourcesWithMetadata,
+        }));
       }
     },
   });
@@ -63,7 +86,6 @@ export default function Home() {
     }
   }, [input]);
 
-  //prevent empty submissions
   const handleEnter = (e: any) => {
     if (e.key === "Enter" && input) {
       handleSubmit(e);
@@ -75,14 +97,14 @@ export default function Home() {
   return (
     <div className="mx-auto flex flex-col gap-4">
       <h1 className="text-2xl font-bold leading-[1.1] tracking-tighter text-center">
-        Chat With Eye Care Reference Texts
+      IGATES - EyeTrauma Assist: The Ocular Trauma AI Chatbot
       </h1>
       <main className={styles.main}>
         <div className={styles.cloud}>
           <div ref={messageListRef} className={styles.messagelist}>
             <div className={styles.apimessage}>
               <Image
-                src="/eye.png"
+                src="/igates.png"
                 alt="AI"
                 width="40"
                 height="40"
@@ -91,7 +113,7 @@ export default function Home() {
               />
               <div className={styles.markdownanswer}>
                 <ReactMarkdown>
-                  Hi, what question do you have about eye care?
+                  Hi, what question do you have about ocular trauma?
                 </ReactMarkdown>
               </div>
             </div>
@@ -104,7 +126,7 @@ export default function Home() {
                 icon = (
                   <Image
                     key={index}
-                    src="/eye.png"
+                    src="/igates.png"
                     alt="AI"
                     width="40"
                     height="40"
@@ -146,18 +168,32 @@ export default function Home() {
                         collapsible
                         className="flex-col text-black"
                       >
-                        {sources.map((doc: Document, index: number) => (
+                        {sources.map((doc: CustomDocument, index: number) => (
                           <div key={`messageSourceDocs-${index}`}>
                             <AccordionItem value={`item-${index}`}>
                               <AccordionTrigger>
-                                <h3>Source {index + 1}</h3>
+                                <h3>Source {index + 1}: {doc.source_type === "textbook" ? "Textbook" : "Abstract"}</h3>
                               </AccordionTrigger>
                               <AccordionContent>
                                 <ReactMarkdown>{doc.pageContent}</ReactMarkdown>
-                                <p className="mt-2">
-                                  <b>Source: </b>
-                                  {extractFileName(doc.metadata.source)}
-                                </p>
+                                {doc.source_type === "textbook" ? (
+                                  <>
+                                    <p><b>Title: </b>{doc.title}</p>
+                                    <p><b>Authors: </b>{doc.authors}</p>
+                                    <p><b>Publication Date: </b>{doc.publication_date}</p>
+                                    <p><b>Publication Year: </b>{doc.publication_year}</p>
+                                    <p><b>Page Number: </b>{doc.page_number}</p>
+                                  </>
+                                ) : (
+                                  <>
+                                    <p><b>PMID: </b>{doc.pmid}</p>
+                                    <p><b>Title: </b>{doc.title}</p>
+                                    <p><b>Authors: </b>{doc.authors}</p>
+                                    <p><b>Journal: </b>{doc.journal}</p>
+                                    <p><b>Publication Date: </b>{doc.publication_date}</p>
+                                    <p><b>Citation Count: </b>{doc.citation_count}</p>
+                                  </>
+                                )}
                               </AccordionContent>
                             </AccordionItem>
                           </div>
@@ -187,7 +223,7 @@ export default function Home() {
                 placeholder={
                   isLoading
                     ? "Waiting for response..."
-                    : "What is the differential diagnosis for a red painful eye?"
+                    : "Type question here..."
                 }
                 className={styles.textarea}
               />
