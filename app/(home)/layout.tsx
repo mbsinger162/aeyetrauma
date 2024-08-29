@@ -1,6 +1,6 @@
 import dynamic from 'next/dynamic'
 
-const DynamicLink = dynamic(() => import('@/components/DynamicLink'), { ssr: false })
+const DynamicLinks = dynamic(() => import('../../components/DynamicLinks'), { ssr: false })
 
 const HomeLayout = ({ children }: { children: React.ReactNode }) => {
   return (
