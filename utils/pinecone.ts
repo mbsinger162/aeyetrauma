@@ -2,6 +2,10 @@ import { OpenAIEmbeddings } from '@langchain/openai';
 import { PineconeStore } from '@langchain/pinecone';
 import { Pinecone } from '@pinecone-database/pinecone';
 import { Embeddings } from '@langchain/core/embeddings';
+import dotenv from 'dotenv';
+
+// Load environment variables from .env.local
+// dotenv.config({ path: '.env.local' });
 
 const pinecone = new Pinecone();
 const pineconeIndex = pinecone.Index(process.env.PINECONE_INDEX!);

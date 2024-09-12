@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "ingest": "npx ts-node ./scripts/ingest.ts"
+    "ingest": "npx ts-node ./scripts/ingest.ts",
+    "process-csv": "npx ts-node ./scripts/process-csv.ts"
   },
   "dependencies": {
     "@langchain/pinecone": "^0.0.7",
@@ -15,19 +16,26 @@
     "@radix-ui/react-accordion": "^1.1.2",
     "ai": "^3.1.18",
     "clsx": "^2.1.1",
+    "csv-parse": "^5.5.6",
     "csv-parser": "^3.0.0",
+    "csv-stringify": "^6.5.1",
     "d3-dsv": "^2.0.0",
     "dotenv": "^16.4.5",
+    "exceljs": "^4.4.0",
     "langchain": "^0.2.3",
     "lucide-react": "^0.379.0",
+    "markdown-it": "^14.1.0",
+    "markdown-to-ast": "^6.0.3",
     "next": "14.2.3",
     "react": "^18",
     "react-dom": "^18",
     "react-markdown": "^9.0.1",
+    "stringify": "^5.2.0",
     "tailwind-merge": "^2.3.0"
   },
   "devDependencies": {
     "@langchain/community": "^0.2.4",
+    "@types/markdown-it": "^14.1.2",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
@@ -36,6 +44,7 @@
     "pdf-parse": "^1.1.1",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
+    "ts-node": "^10.9.2",
     "typescript": "^5"
   }
 }
