@@ -35,6 +35,8 @@ export async function POST(req: Request) {
 
     const currentMessage = messages[messages.length - 1].content;
 
+    console.log(`User Query: ${currentMessage}`);
+
     const chatModel = new ChatOpenAI({
       modelName: "gpt-4o",
       streaming: true,
